@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace DatingAppAPI.Repository
 {
-   public interface IUserRepo
+   public interface IAuthRepository
     {
         Task<int> AddUser(User user);
-        Task<UserDTO> GetUser(User user);
+        Task<UserForRegisterDTO> GetUser(User user);
     }
 }
