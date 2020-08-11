@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 using DatingAppAPI.DTO;
 using DatingAppAPI.Models;
 using DatingAppAPI.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DatingAppAPI.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -28,69 +30,59 @@ namespace DatingAppAPI.Controllers
 
         [HttpGet]
         [Route("GetUser")]
-        public async Task<IActionResult> GetUser(User user)
+        public async Task<IActionResult> GetUser(UserForLoginDTO user)
         {
             if (user == null)
             {
                 return BadRequest();
             }
 
-            try
-            {
-                var u = await userRepo.GetUser(user);
+            var u = await userRepo.GetUser(user.UserName, user.Password);
 
-                if (u == null)
-                {
-                    return Unauthorized();  
-                }
-                else
-                {
-                    return Ok(new
-                    {
-                        token = GenerateJwtToken(u).Result,
-                        user = u
-                    });
-                }
-
-                
-               
-            }
-            catch (Exception)
+            if (u == null)
             {
-                return BadRequest();
+                return Unauthorized();
             }
+            else
+            {
+                return Ok(new
+                {
+                    token = GenerateJwtToken(u).Result,
+                    user = u
+                });
+            }
+
         }
 
         [HttpPost]
         [Route("AddUser")]
-        public async Task<IActionResult> AddPost([FromBody] User model)
+        public async Task<IActionResult> AddUser(UserForRegisterDTO model)
         {
-            if (ModelState.IsValid)
-            {
-                try
+           
+                if (await userRepo.UserExist(model.UserName))
                 {
-                    var userId = await userRepo.AddUser(model);
-                    if (userId > 0)
-                    {
-                        return Ok(userId);
-                    }
-                    else
-                    {
-                        return NotFound();
-                    }
-                }
-                catch (Exception)
-                {
-
                     return BadRequest();
                 }
 
-            }
+                var user = new User
+                {
+                    UserName = model.UserName
+                };
 
-            return BadRequest();
+
+                var userToCreate = await userRepo.AddUser(user, model.Password);
+                if (userToCreate.Id > 0)
+                {
+                    return Ok(userToCreate.Id);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
         }
 
-        private async Task<string> GenerateJwtToken(UserForRegisterDTO user)
+        private async Task<string> GenerateJwtToken(User user)
         {
             var claims = new List<Claim>
             {
@@ -98,7 +90,7 @@ namespace DatingAppAPI.Controllers
                 new Claim(ClaimTypes.Name, user.UserName)
             };
 
-           
+
 
             var key = new SymmetricSecurityKey(Encoding.UTF8
                 .GetBytes(_config.GetSection("AppSettings:Token").Value));

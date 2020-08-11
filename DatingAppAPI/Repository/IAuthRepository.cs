@@ -9,7 +9,9 @@ namespace DatingAppAPI.Repository
 {
    public interface IAuthRepository
     {
-        Task<int> AddUser(User user);
-        Task<UserForRegisterDTO> GetUser(User user);
+        Task<User> AddUser(User user,string password);
+        Task<User> GetUser(string userName,string password);
+
+        Task<bool> UserExist(string userName);
     }
 }
