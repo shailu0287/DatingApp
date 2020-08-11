@@ -28,16 +28,16 @@ namespace DatingAppAPI.Controllers
             _config = config;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetUser")]
-        public async Task<IActionResult> GetUser(UserForLoginDTO user)
+        public async Task<IActionResult> GetUser([FromBody] UserForLoginDTO user)
         {
             if (user == null)
             {
                 return BadRequest();
             }
 
-            var u = await userRepo.GetUser(user.UserName, user.Password);
+            var u = await userRepo.GetUser(user.userName, user.password);
 
             if (u == null)
             {
