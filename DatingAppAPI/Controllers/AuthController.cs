@@ -60,12 +60,15 @@ namespace DatingAppAPI.Controllers
         [Route("AddUser")]
         public async Task<IActionResult> AddUser(UserForRegisterDTO model)
         {
-            if (await userRepo.UserExist(model.UserName))
+            if (ModelState.IsValid)
             {
-                throw new Exception("User Already Exist");
-            }
 
-            var user = new User
+                if (await userRepo.UserExist(model.UserName))
+                {
+                    throw new Exception("User Already Exist");
+                }
+
+                var user = new User
                 {
                     UserName = model.UserName
                 };
@@ -76,10 +79,10 @@ namespace DatingAppAPI.Controllers
                 {
                     return Ok(userToCreate.Id);
                 }
-                else
-                {
-                    return NotFound();
-                }
+            }
+          
+                return BadRequest();
+            
 
         }
 
