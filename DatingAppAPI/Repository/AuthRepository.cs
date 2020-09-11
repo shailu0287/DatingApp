@@ -1,4 +1,4 @@
-﻿using DatingAppAPI.DTO;
+﻿using DatingApp.Data;
 using DatingAppAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -61,7 +61,7 @@ namespace DatingAppAPI.Repository
             if (db != null)
             {
 
-                var user = await db.User.FirstOrDefaultAsync(x => x.UserName == userName);
+                var user = await db.User.Include(p=>p.Photo).FirstOrDefaultAsync(x => x.UserName == userName);
 
                 if (user == null)
                     return null;

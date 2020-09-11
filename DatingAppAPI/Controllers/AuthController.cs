@@ -5,9 +5,11 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using DatingAppAPI.DTO;
-using DatingAppAPI.Models;
-using DatingAppAPI.Repository;
+using AutoMapper;
+using DatingApp.Data;
+using DatingApp.Data.DTO;
+using DatingApp.Data.Models;
+using DatingApp.Data.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -22,10 +24,12 @@ namespace DatingAppAPI.Controllers
     {
         IAuthRepository userRepo;
         private readonly IConfiguration _config;
-        public AuthController(IAuthRepository _userRepo, IConfiguration config)
+        private IMapper _mapper;
+        public AuthController(IAuthRepository _userRepo, IConfiguration config, IMapper mapper)
         {
             userRepo = _userRepo;
             _config = config;
+            _mapper = mapper;
         }
 
         [HttpPost]
@@ -40,7 +44,7 @@ namespace DatingAppAPI.Controllers
          
 
             var u = await userRepo.GetUser(user.userName, user.password);
-
+            var userToReturn = _mapper.Map<UserForListDTO>(u);
             if (u == null)
             {
                 return Unauthorized();
@@ -50,7 +54,7 @@ namespace DatingAppAPI.Controllers
                 return Ok(new
                 {
                     token = GenerateJwtToken(u).Result,
-                    user = u
+                    userToReturn
                 });
             }
 
@@ -73,11 +77,12 @@ namespace DatingAppAPI.Controllers
                     UserName = model.UserName
                 };
 
-
-                var userToCreate = await userRepo.AddUser(user, model.Password);
+                var userToCreate = _mapper.Map<User>(model);
+                var createdUser = await userRepo.AddUser(userToCreate, model.Password);
+                var userToReturn = _mapper.Map<UserForDetailedDTO>(createdUser);
                 if (userToCreate.Id > 0)
                 {
-                    return Ok(userToCreate.Id);
+                    return CreatedAtRoute("GetUser", new { Controller="Users", id= userToCreate.Id } ,userToReturn);
                 }
             }
           

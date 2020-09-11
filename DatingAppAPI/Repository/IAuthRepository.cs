@@ -1,4 +1,4 @@
-﻿using DatingAppAPI.DTO;
+﻿using DatingApp.Data;
 using DatingAppAPI.Models;
 using System;
 using System.Collections.Generic;

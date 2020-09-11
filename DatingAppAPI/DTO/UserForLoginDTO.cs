@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DatingAppAPI.DTO
+namespace DatingApp.Data
 {
     public class UserForLoginDTO
     {
