@@ -23,11 +23,14 @@ namespace DatingAppAPI.Controllers
         private readonly IDatingRepository _repo;
         private readonly IMapper _mapper;
         private readonly IQueueMessage _qmessage;
-        public MessagesController(IDatingRepository repo, IMapper mapper, IQueueMessage qmessage)
+        private readonly IKeyVault _keyValut;
+
+        public MessagesController(IDatingRepository repo, IMapper mapper, IQueueMessage qmessage, IKeyVault keyVault)
         {
             _mapper = mapper;
             _repo = repo;
             _qmessage = qmessage;
+            _keyValut = keyVault;
         }
 
         [HttpGet("{id}", Name = "GetMessage")]
@@ -95,6 +98,7 @@ namespace DatingAppAPI.Controllers
             var message = _mapper.Map<Messages>(messageForCreationDto);
             QueueMessages qmessage = new QueueMessages();
             qmessage=_mapper.Map<QueueMessages>(messageForCreationDto);
+            qmessage.KeyName = await _keyValut.GetKeyValue("key1");
             message.IsRead = false;
             bool isSend= await _qmessage.AddMessage(qmessage);
            // _repo.Add(message);

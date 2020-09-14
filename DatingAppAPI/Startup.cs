@@ -68,6 +68,7 @@ namespace DatingAppAPI
             services.AddScoped<IDatingRepository, DatingRepository>();
             services.AddScoped<IBlobStorage, BlobStorage>();
             services.AddScoped<IQueueMessage, QueueMessage>();
+            services.AddScoped<IKeyVault, KeyVault>();
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
